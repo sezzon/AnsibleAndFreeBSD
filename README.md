@@ -15,7 +15,15 @@
 4. Настроить FreeBSD как офисный фшлюз с потдержкой VPN (ipsec + racoon)
 5. (Опционально, если придумаю что засунуть в Docker, например Apache или nginx + owncloud)
 
+
+
 ## Ну поехали
+
+Назначим IP адреса:
+192.168.250.20 - Ubuntu
+192.168.250.21 - FreeBSD внешний IP
+10.0.2.1       - FreeBSD локальный IP
+
 ### Устновка Ubuntu
 Создаем виртуальную машину в Hyper-V как обычно.
 Далее заходим в настройки виртуальной машины удаляем "сетевой адаптер" и добавляем "устаревший сетевой адаптер".
@@ -31,16 +39,20 @@ sudo apt-get update
 
 sudo apt-get upgrade
 
-Для скрещивания с Hyper-V добавляем в файл
+Для скрещивания с Hyper-V добавляем в конец файла
 /etc/initramfs-tools/modules
 
 hv_vmbus
+
 hv_storvsc
+
 hv_blkvsc
+
 hv_netvsc
 
+и устанавливаем
 
+apt-get install --install-recommends linux-virtual-lts-xenial -y
+apt-get install --install-recommends linux-tools-virtual-lts-xenial linux-cloud-tools-virtual-lts-xenial -y
 
-apt-get install --install-recommends linux-virtual-lts-xenial
-apt-get install --install-recommends linux-tools-virtual-lts-xenial linux-cloud-tools-virtual-lts-xenial
-
+update-initramfs -u
