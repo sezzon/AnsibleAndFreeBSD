@@ -47,6 +47,7 @@ sudo apt-get upgrade
 Для скрещивания с Hyper-V устанавливаем
 
 apt-get install --install-recommends linux-virtual-lts-xenial -y
+
 apt-get install --install-recommends linux-tools-virtual-lts-xenial linux-cloud-tools-virtual-lts-xenial -y
 
 Перезагружаемся и вуаля, мы дружим с Hyper-V.
