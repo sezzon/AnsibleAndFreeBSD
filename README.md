@@ -1,4 +1,6 @@
 # AnsibleAndFreeBSD
+(Изучаем Ansible)
+
 
 ## Задачи
 
@@ -24,7 +26,7 @@
 192.168.250.21 - FreeBSD внешний IP
 10.0.2.1       - FreeBSD локальный IP
 
-### Устновка Ubuntu
+### 1. Устновка Ubuntu
 Создаем виртуальную машину в Hyper-V как обычно.
 Далее заходим в настройки виртуальной машины удаляем "сетевой адаптер" и добавляем "устаревший сетевой адаптер".
 Так же необходимо поставить галочку "Включить спуфинг MAC-адресов". Иначе в Ubuntu не заработает сеть.
@@ -39,20 +41,16 @@ sudo apt-get update
 
 sudo apt-get upgrade
 
-Для скрещивания с Hyper-V добавляем в конец файла
-/etc/initramfs-tools/modules
-
-hv_vmbus
-
-hv_storvsc
-
-hv_blkvsc
-
-hv_netvsc
-
-и устанавливаем
+Для скрещивания с Hyper-V устанавливаем
 
 apt-get install --install-recommends linux-virtual-lts-xenial -y
 apt-get install --install-recommends linux-tools-virtual-lts-xenial linux-cloud-tools-virtual-lts-xenial -y
 
-update-initramfs -u
+Перезагружаемся и вуаля, мы дружим с Hyper-V.
+
+### 2. Установка FreeBSD
+В отличие от Ubuntu, FreeBSD дружит с Hyper-V из коробки, начиная с 10-й версии. Поэтому заменять сетевой адаптер на старую
+версию не нежно. Но "Включить спуфинг MAC-адресов" тоже необходимо.
+Установка проходит стандартно, описывать не буду.
+
+### 3. Установка Ansible в Ubuntu
