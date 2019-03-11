@@ -119,7 +119,7 @@ ssh-copy-id user1@192.168.250.21
 
 ansible all -m ping
 
-ansible -u user1 -m raw -a 'uptime' freebsd
+ansible -u user1 -a 'uptime' freebsd
 
 
 ### 4. Настрой FreeBSD как офисный шлюз с поддержкой VPN (ipsec + racoon)

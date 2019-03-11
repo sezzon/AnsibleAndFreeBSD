@@ -56,50 +56,58 @@
 # иначе мы не подключимся повторно по ssh
 #
 # Включаем firewall и nat
-  - name: Up gateway
-    lineinfile:
-      path: /etc/rc.conf
-      regexp: '^gateway_enable'
-      insertafter: '^defaultrouter'
-      line: 'gateway_enable="YES"'
-
-  - name: Up firewall
-    lineinfile:
-      path: /etc/rc.conf
-      regexp: '^firewall_enable'
-      insertafter: '^gateway_enable'
-      line: 'firewall_enable="YES"'
-
-  - name: Firewall type
-    lineinfile:
-      path: /etc/rc.conf
-      regexp: '^firewall_type'
-      insertafter: '^firewall_enable'
-      line: 'firewall_type="open"'
-
-  - name: NAT enable
-    lineinfile:
-      path: /etc/rc.conf
-      regexp: '^natd_enable'
-      insertafter: '^firewall_type'
-      line: 'natd_enable="YES"'
-
+#  - name: Up gateway
+#    lineinfile:
+#      path: /etc/rc.conf
+#      regexp: '^gateway_enable'
+#      insertafter: '^defaultrouter'
+#      line: 'gateway_enable="YES"'
+#
+#  - name: Up firewall
+#    lineinfile:
+#      path: /etc/rc.conf
+#      regexp: '^firewall_enable'
+#      insertafter: '^gateway_enable'
+#      line: 'firewall_enable="YES"'
+#
+#  - name: Firewall type
+#    lineinfile:
+#      path: /etc/rc.conf
+#      regexp: '^firewall_type'
+#      insertafter: '^firewall_enable'
+#      line: 'firewall_type="open"'
+#
+#  - name: NAT enable
+#    lineinfile:
+#      path: /etc/rc.conf
+#      regexp: '^natd_enable'
+#      insertafter: '^firewall_type'
+#      line: 'natd_enable="YES"'
+#
 # И указываем NAT-у внешний интерфейс ( у нас hn0 )
-  - name: NAT interface
-    lineinfile:
-      path: /etc/rc.conf
-      regexp: '^natd_interface'
-      insertafter: '^natd_enable'
-      line: 'natd_interface="hn0"'
-
+#  - name: NAT interface
+#    lineinfile:
+#      path: /etc/rc.conf
+#      regexp: '^natd_interface'
+#      insertafter: '^natd_enable'
+#      line: 'natd_interface="hn0"'
+#
 # Теперь можно перезагрузиться
-  - name: Reboot
-    reboot:
-      reboot_timeout: 240
-
+#  - name: Reboot
+#    reboot:
+#      reboot_timeout: 240
+#
 # Устанавливаем мир
-  - name: Install World
-    make:
-      chdir: /usr/src
-      target: installworld
-    become: yes
+#  - name: Install World
+#    make:
+#      chdir: /usr/src
+#      target: installworld
+#    become: yes
+#
+# Обновим системные файлики
+#  - name: Mergemaster
+#    command: mergemaster -iF
+#    args:
+#      chdir: /usr/src
+#    register: /tmp/mergemater.log
+
