@@ -105,9 +105,29 @@
 #    become: yes
 #
 # Обновим системные файлики
+# mergemaster надо запускать вручную
 #  - name: Mergemaster
-#    command: mergemaster -iF
+#    command: mergemaster -iFU
 #    args:
 #      chdir: /usr/src
-#    register: /tmp/mergemater.log
 
+# Удалим устаревшие файлы
+  - name: Delete Old
+    make:
+      chdir: /usr/src
+      target: -DBATCH_DELETE_OLD_FILES delete-old
+#    become: yes
+#
+
+# Теперь можно перезагрузиться
+#  - name: Reboot
+#    reboot:
+#      reboot_timeout: 240
+#
+# Устанавливаем мир
+#  - name: Install World
+#    make:
+#      chdir: /usr/src
+#      target: installworld
+#    become: yes
+#
