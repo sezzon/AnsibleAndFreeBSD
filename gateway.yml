@@ -4,130 +4,115 @@
   become: yes
 
 # Устанавливаем необходимые пакеты
-#  tasks:
-#  - name: pkg present ipsec-tools
-#    pkgng:
-#      name: mc subversion
-#      state: present
-
-# Обновляем исходники
-#  - name: get src
-#    subversion:
-#      repo: svn://svn.freebsd.org/base/stable/12
-#      dest: /usr/src
+  tasks:
+  - name: pkg present ipsec-tools
+    pkgng:
+      name: mc subversion
+      state: present
 
 # Копирум ядро GENERIC в IPSEC
 # Добавляем необходимые опции и девасы
-#  - name: Copy and rename kernel
-#    shell:
-#      cp /sys/amd64/conf/GENERIC /sys/amd64/conf/IPSEC && echo -e "options         IPSEC\ndevice          crypto" >> /sys/amd64/conf/IPSEC \
-#      && echo -e "options         IPFIREWALL\noptions         IPFIREWALL_VERBOSE" >> /sys/amd64/conf/IPSEC \
-#      && echo -e "options         IPFIREWALL_VERBOSE_LIMIT=5\noptions         IPDIVERT\noptions         DUMMYNET" >> /sys/amd64/conf/IPSEC
+  - name: Copy and rename kernel
+    shell:
+      cp /sys/amd64/conf/GENERIC /sys/amd64/conf/IPSEC && echo -e "options         IPSEC\ndevice          crypto" >> /sys/amd64/conf/IPSEC \
+      && echo -e "options         IPFIREWALL\noptions         IPFIREWALL_VERBOSE" >> /sys/amd64/conf/IPSEC \
+      && echo -e "options         IPFIREWALL_VERBOSE_LIMIT=5\noptions         IPDIVERT\noptions         DUMMYNET" >> /sys/amd64/conf/IPSEC
 
-# Собирамем мир и ядро, устанавливам ядро
+# Собирамем ядро, устанавливам ядро
+# Раньше я делал так
 #  - name: Build world and build kernel and install kernel IPSEC
 #    shell:
 #      cd /usr/src && make buildworld > /tmp/buildworld.log \
 #      && make buildkernel KERNCONF=IPSEC > /tmp/buildkernel.log \
 #      && make installkernel KERNCONF=IPSEC > /tmp/installkernel.log \
-
-  tasks:
-# Собираем мир
-#  - name: Make world
-#    make:
-#      chdir: /usr/src
-#      target: buildworld
 #
+# Но мы изучаем Ansible поэтому будем пользоватся модулями
+#
+#  tasks:
 # Собираем наше новое ядро
-#  - name: Make KERNEL
-#    make:
-#      chdir: /usr/src
-#      target: buildkernel
-#      params: KERNCONF=IPSEC
-#
+  - name: Make KERNEL
+    make:
+      chdir: /usr/src
+      target: buildkernel
+      params: KERNCONF=IPSEC
+
 # Устанавливаем ядро
-#  - name: Install KERNEL
-#    make:
-#      chdir: /usr/src
-#      target: installkernel
-#      params: KERNCONF=IPSEC
+  - name: Install KERNEL
+    make:
+      chdir: /usr/src
+      target: installkernel
+      params: KERNCONF=IPSEC
 # Теперь необходимо перезагрузить систему
 # Но прежде нам необходимо включить firewall и NAT
 # иначе мы не подключимся повторно по ssh
-#
+
 # Включаем firewall и nat
-#  - name: Up gateway
-#    lineinfile:
-#      path: /etc/rc.conf
-#      regexp: '^gateway_enable'
-#      insertafter: '^defaultrouter'
-#      line: 'gateway_enable="YES"'
-#
-#  - name: Up firewall
-#    lineinfile:
-#      path: /etc/rc.conf
-#      regexp: '^firewall_enable'
-#      insertafter: '^gateway_enable'
-#      line: 'firewall_enable="YES"'
-#
-#  - name: Firewall type
-#    lineinfile:
-#      path: /etc/rc.conf
-#      regexp: '^firewall_type'
-#      insertafter: '^firewall_enable'
-#      line: 'firewall_type="open"'
-#
-#  - name: NAT enable
-#    lineinfile:
-#      path: /etc/rc.conf
-#      regexp: '^natd_enable'
-#      insertafter: '^firewall_type'
-#      line: 'natd_enable="YES"'
-#
+  - name: Up gateway
+    lineinfile:
+      path: /etc/rc.conf
+      regexp: '^gateway_enable'
+      insertafter: '^defaultrouter'
+      line: 'gateway_enable="YES"'
+
+  - name: Up firewall
+    lineinfile:
+      path: /etc/rc.conf
+      regexp: '^firewall_enable'
+      insertafter: '^gateway_enable'
+      line: 'firewall_enable="YES"'
+
+  - name: Firewall type
+    lineinfile:
+      path: /etc/rc.conf
+      regexp: '^firewall_type'
+      insertafter: '^firewall_enable'
+      line: 'firewall_type="open"'
+
+  - name: NAT enable
+    lineinfile:
+      path: /etc/rc.conf
+      regexp: '^natd_enable'
+      insertafter: '^firewall_type'
+      line: 'natd_enable="YES"'
+
 # И указываем NAT-у внешний интерфейс ( у нас hn0 )
-#  - name: NAT interface
-#    lineinfile:
-#      path: /etc/rc.conf
-#      regexp: '^natd_interface'
-#      insertafter: '^natd_enable'
-#      line: 'natd_interface="hn0"'
-#
-# Теперь можно перезагрузиться
-#  - name: Reboot
-#    reboot:
-#      reboot_timeout: 240
-#
-# Устанавливаем мир
-#  - name: Install World
-#    make:
-#      chdir: /usr/src
-#      target: installworld
-#    become: yes
-#
-# Обновим системные файлики
-# mergemaster надо запускать вручную
-#  - name: Mergemaster
-#    command: mergemaster -iFU
-#    args:
-#      chdir: /usr/src
-
-# Удалим устаревшие файлы
-  - name: Delete Old
-    make:
-      chdir: /usr/src
-      target: -DBATCH_DELETE_OLD_FILES delete-old
-#    become: yes
-#
+  - name: NAT interface
+    lineinfile:
+      path: /etc/rc.conf
+      regexp: '^natd_interface'
+      insertafter: '^natd_enable'
+      line: 'natd_interface="hn0"'
 
 # Теперь можно перезагрузиться
-#  - name: Reboot
-#    reboot:
-#      reboot_timeout: 240
-#
-# Устанавливаем мир
-#  - name: Install World
-#    make:
-#      chdir: /usr/src
-#      target: installworld
-#    become: yes
-#
+  - name: Reboot
+    reboot:
+      reboot_timeout: 240
+
+  - name: IPSEC enable
+    lineinfile:
+      path: /etc/rc.conf
+      regexp: '^ipsec_enable'
+      insertafter: '^natd_enable'
+      line: 'ipsec_enable="YES"'
+
+  - name: IPSEC program
+    lineinfile:
+      path: /etc/rc.conf
+      regexp: '^ipsec_program'
+      insertafter: '^ipsec_enable'
+      line: 'ipsec_program="/usr/local/sbin/setkey"'
+
+  - name: IPSEC file
+    lineinfile:
+      path: /etc/rc.conf
+      regexp: '^ipsec_file'
+      insertafter: '^ipsec_program'
+      line: 'ipsec_file="/usr/local/etc/racoon/setkey.conf"'
+
+  - name: IPSEC file
+    lineinfile:
+      path: /etc/rc.conf
+      regexp: '^racoon_enable'
+      insertafter: '^ipsec_file'
+      line: 'racoon_enable="yes"'
+
