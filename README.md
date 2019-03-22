@@ -58,8 +58,7 @@ sudo apt-get install --install-recommends linux-tools-virtual-lts-xenial linux-c
 Установка проходит стандартно, описывать не буду, опишу нюансы.
 
 Поддержка IPsec включена по умолчанию во FreeBSD 11 и более поздних версиях.
-Но мы изучаем Ansible и усложним себе задачу.
-добавим в ядро опции
+Но мы изучаем Ansible и усложним себе задачу, добавим в ядро опции:
 
 options   IPSEC        #IP security
 
