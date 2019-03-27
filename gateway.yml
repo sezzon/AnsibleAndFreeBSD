@@ -7,7 +7,7 @@
   tasks:
   - name: pkg present ipsec-tools
     pkgng:
-      name: mc subversion
+      name: ipsec-tools mc subversion
       state: present
 
 # Копирум ядро GENERIC в IPSEC

@@ -137,5 +137,13 @@ ansible -u user1 -a 'uptime' freebsd
 ### 4. Настрой FreeBSD как офисный шлюз с поддержкой VPN (ipsec + racoon)
 Далее настройка будет осуществляться средствами Ansible
 файл gateway.yml. Читайте файл gateway.yml там тоже есть коментарии.
+Команда для запуска
+
+ansible-playbook gateway.yml
+
+После выполнения остается настроить сам racoon.
+Почитать про его настройку можно тут:
+
+https://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/ipsec.html
 
 
