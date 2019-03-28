@@ -11,12 +11,19 @@
       state: present
 
 # Копирум ядро GENERIC в IPSEC
-# Добавляем необходимые опции и девасы
+# Добавляем необходимые опции и девайсы
   - name: Copy and rename kernel
     shell:
       cp /sys/amd64/conf/GENERIC /sys/amd64/conf/IPSEC && echo -e "options         IPSEC\ndevice          crypto" >> /sys/amd64/conf/IPSEC \
       && echo -e "options         IPFIREWALL\noptions         IPFIREWALL_VERBOSE" >> /sys/amd64/conf/IPSEC \
       && echo -e "options         IPFIREWALL_VERBOSE_LIMIT=5\noptions         IPDIVERT\noptions         DUMMYNET" >> /sys/amd64/conf/IPSEC
+
+  - name: Rename ident
+    lineinfile:
+      path: /sys/amd64/conf/IPSEC
+      regexp: '^ident'
+      insertafter: '^defaultrouter'
+      line: 'ident           IPSEC'
 
 # Собирамем ядро, устанавливам ядро
 # Раньше я делал так
@@ -28,20 +35,19 @@
 #
 # Но мы изучаем Ansible поэтому будем пользоватся модулями
 #
-#  tasks:
 # Собираем наше новое ядро
-  - name: Make KERNEL
-    make:
-      chdir: /usr/src
-      target: buildkernel
-      params: KERNCONF=IPSEC
-
+#  - name: Make KERNEL
+#    make:
+#      chdir: /usr/src
+#      target: buildkernel
+#      params: KERNCONF=IPSEC
+#
 # Устанавливаем ядро
-  - name: Install KERNEL
-    make:
-      chdir: /usr/src
-      target: installkernel
-      params: KERNCONF=IPSEC
+#  - name: Install KERNEL
+#    make:
+#      chdir: /usr/src
+#      target: installkernel
+#      params: KERNCONF=IPSEC
 # Теперь необходимо перезагрузить систему
 # Но прежде нам необходимо включить firewall и NAT
 # иначе мы не подключимся повторно по ssh
@@ -88,11 +94,25 @@
     reboot:
       reboot_timeout: 240
 
+  - name: Create gif0
+    lineinfile:
+      path: /etc/rc.conf
+      regexp: '^cloned_interfaces'
+      insertafter: '^natd_interface'
+      line: 'cloned_interfaces="gif0"'
+
+  - name: Configure gif0
+    lineinfile:
+      path: /etc/rc.conf
+      regexp: '^'
+      insertafter: '^cloned_interfaces'
+      line: 'ifconfig_gre0="inet 192.168.250.55 192.168.0.254 netmask 0xffffffff tunnel 192.168.250.21 109.124.116.22"'
+
   - name: IPSEC enable
     lineinfile:
       path: /etc/rc.conf
       regexp: '^ipsec_enable'
-      insertafter: '^natd_enable'
+      insertafter: '^natd_interface'
       line: 'ipsec_enable="YES"'
 
   - name: IPSEC program
@@ -116,3 +136,26 @@
       insertafter: '^ipsec_file'
       line: 'racoon_enable="yes"'
 
+  - name: Copy psk.txt
+    copy:
+      src: psk.txt
+      dest: /usr/local/etc/racoon/psk.txt
+      owner: root
+      group: wheel
+      mode: 0600
+
+  - name: Copy racoon.conf
+    copy:
+      src: racoon.conf
+      dest: /usr/local/etc/racoon/racoon.conf
+      owner: root
+      group: wheel
+      mode: 0644
+
+  - name: Copy setkey.conf
+    copy:
+      src: setkey.conf
+      dest: /usr/local/etc/racoon/setkey.conf
+      owner: root
+      group: wheel
+      mode: 0644
