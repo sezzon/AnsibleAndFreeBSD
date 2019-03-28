@@ -107,7 +107,7 @@
     lineinfile:
       path: /etc/rc.conf
       regexp: '^static_routes'
-      insertafter: '^ifconfig_gre0'
+      insertafter: '^ifconfig_gif0'
       line: 'static_routes="rt1"'
 
   - name: Add static route rt1

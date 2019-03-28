@@ -15,8 +15,6 @@
 2. Установить FreeBSD 12.0 в качестве гостя под Hyper-V Windows server 2008 r2
 3. Установить в Ubuntu Ansible
 4. Настроить FreeBSD как офисный шлюз с потдержкой VPN (ipsec + racoon)
-5. (Опционально, если придумаю что засунуть в Docker, например Apache или nginx + owncloud)
-
 
 
 ## Ну поехали
@@ -142,13 +140,26 @@ ansible -u user1 -a 'uptime' freebsd
 ### 4. Настрой FreeBSD как офисный шлюз с поддержкой VPN (ipsec + racoon)
 Далее настройка будет осуществляться средствами Ansible
 файл gateway.yml. Читайте файл gateway.yml там тоже есть коментарии.
+Настройку файла rc.conf делаем в файле gateway.yml, поэтому сначала редактируем
+под свои настройки и свое железо. Для настройки ipsec используем файлы
+psk.txt racoon.conf setkey.conf. Эти файлы Ansible просто копируе, поэтому
+их тоже редактируем под себя до запуска.
 Команда для запуска
 
 ansible-playbook gateway.yml
 
-После выполнения остается настроить сам racoon.
-Почитать про его настройку можно тут:
+Но я люблю, что бы оставальсь логи и запускаю так
+
+ansible-playbook gateway.yml > playbook.log &
+
+А ход выполнения смотрю так
+
+tail -f playbook.log
+
+Файл playbook.log приложен, можете ознакомится.
+
+Почитать про настройку ipsec можно тут:
 
 https://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/ipsec.html
 
-
+### Вот и все, шлюз настроен и vpn шифруется
