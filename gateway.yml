@@ -29,25 +29,25 @@
 # Раньше я делал так
 #  - name: Build world and build kernel and install kernel IPSEC
 #    shell:
-#      cd /usr/src && make buildworld > /tmp/buildworld.log \
+#      cd /usr/src \
 #      && make buildkernel KERNCONF=IPSEC > /tmp/buildkernel.log \
-#      && make installkernel KERNCONF=IPSEC > /tmp/installkernel.log \
+#      && make installkernel KERNCONF=IPSEC > /tmp/installkernel.log
 #
 # Но мы изучаем Ansible поэтому будем пользоватся модулями
 #
 # Собираем наше новое ядро
-#  - name: Make KERNEL
-#    make:
-#      chdir: /usr/src
-#      target: buildkernel
-#      params: KERNCONF=IPSEC
-#
+  - name: Make KERNEL
+    make:
+      chdir: /usr/src
+      target: buildkernel
+      params: KERNCONF=IPSEC
+
 # Устанавливаем ядро
-#  - name: Install KERNEL
-#    make:
-#      chdir: /usr/src
-#      target: installkernel
-#      params: KERNCONF=IPSEC
+  - name: Install KERNEL
+    make:
+      chdir: /usr/src
+      target: installkernel
+      params: KERNCONF=IPSEC
 # Теперь необходимо перезагрузить систему
 # Но прежде нам необходимо включить firewall и NAT
 # иначе мы не подключимся повторно по ssh
@@ -89,11 +89,6 @@
       insertafter: '^natd_enable'
       line: 'natd_interface="hn0"'
 
-# Теперь можно перезагрузиться
-  - name: Reboot
-    reboot:
-      reboot_timeout: 240
-
   - name: Create gif0
     lineinfile:
       path: /etc/rc.conf
@@ -104,9 +99,23 @@
   - name: Configure gif0
     lineinfile:
       path: /etc/rc.conf
-      regexp: '^'
+      regexp: '^ifconfig_gif0'
       insertafter: '^cloned_interfaces'
-      line: 'ifconfig_gre0="inet 192.168.250.55 192.168.0.254 netmask 0xffffffff tunnel 192.168.250.21 109.124.116.22"'
+      line: 'ifconfig_gif0="inet 10.0.2.1 10.246.38.1 netmask 0xffffffff tunnel 192.168.250.21 172.16.5.4"'
+
+  - name: Enable static route
+    lineinfile:
+      path: /etc/rc.conf
+      regexp: '^static_routes'
+      insertafter: '^ifconfig_gre0'
+      line: 'static_routes="rt1"'
+
+  - name: Add static route rt1
+    lineinfile:
+      path: /etc/rc.conf
+      regexp: '^route_rt1'
+      insertafter: '^static_routes'
+      line: 'route_rt1="-net 10.246.38.1/24 -interface gif0"'
 
   - name: IPSEC enable
     lineinfile:
@@ -129,12 +138,26 @@
       insertafter: '^ipsec_program'
       line: 'ipsec_file="/usr/local/etc/racoon/setkey.conf"'
 
-  - name: IPSEC file
+  - name: Racoon enable
     lineinfile:
       path: /etc/rc.conf
       regexp: '^racoon_enable'
       insertafter: '^ipsec_file'
       line: 'racoon_enable="yes"'
+
+  - name: IKE enable
+    lineinfile:
+      path: /etc/rc.conf
+      regexp: '^ike_enable'
+      insertafter: '^racoon_enable'
+      line: 'ike_enable="YES"'
+
+  - name: IKE program
+    lineinfile:
+      path: /etc/rc.conf
+      regexp: '^ike_program'
+      insertafter: '^ike_enable'
+      line: 'ike_program="/usr/local/sbin/racoon"'
 
   - name: Copy psk.txt
     copy:
@@ -159,3 +182,8 @@
       owner: root
       group: wheel
       mode: 0644
+
+# Теперь можно перезагрузиться
+  - name: Reboot
+    reboot:
+      reboot_timeout: 240
